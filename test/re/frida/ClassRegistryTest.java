@@ -1,6 +1,8 @@
 package re.frida;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Test;
@@ -155,6 +157,15 @@ public class ClassRegistryTest {
                 "to make a long-lived wrapper?", script.getNextMessage());
     }
 
+    @Test
+    public void classShouldBeInitializedWhenUsed() {
+        assertFalse(LazyBadgerTracker.initialized);
+        loadScript("Java.use('re.frida.LazyBadger');" +
+                "send('used');");
+        assertEquals("used", script.getNextMessage());
+        assertTrue(LazyBadgerTracker.initialized);
+    }
+
     private Script script = null;
 
     private void loadScript(String code) {
@@ -182,4 +193,14 @@ class UniqueBadger {
     public UniqueBadger(String name) {
         this.name = name;
     }
+}
+
+class LazyBadger {
+    static {
+        LazyBadgerTracker.initialized = true;
+    }
+}
+
+class LazyBadgerTracker {
+    public static boolean initialized = false;
 }
